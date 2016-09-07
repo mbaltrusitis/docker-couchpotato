@@ -1,16 +1,21 @@
-FROM mbaltrusitis/deb-base:wheezy
+FROM ubuntu:16.04
+MAINTAINER Matthew Baltrusitis <matthew@baltrusitis.com>
 
-ENV LANG "C"
+ENV DEBIAN_FRONTEND="noninteractive"
+ENV HOME=/opt/couchpotato
+ENV CONFIGS=$HOME/.couchpotato
 
-RUN mkdir /app \
-    && git clone https://github.com/RuudBurger/CouchPotatoServer.git /app/couchpotato \
-    && apt-get -q update \
-    && apt-get install -qqfy --fix-missing \
+RUN mkdir -p "${HOME}" \
+    && apt-get -qy update \
+    && apt-get install -qy --fix-missing \
+        git \
         gcc \
         python-pip \
         python-lxml \
-        python-openssl
+        python-openssl \
+    && git clone https://github.com/RuudBurger/CouchPotatoServer.git "${HOME}"/src
 
+VOLUME ["${CONFIGS}"]
 EXPOSE 5050
 
-CMD ["python", "/app/couchpotato/CouchPotato.py", "--config_file=/configdata/couchpotato/config.ini", "--data_dir=/mediadata"]
+CMD ["python", "/opt/couchpotato/src/CouchPotato.py", "--console_log", "--config_file=/opt/couchpotato/.couchpotato/config.ini", "--data_dir=/opt/couchpotato/.couchpotato"]
